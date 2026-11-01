@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Best Friend Quiz 💗</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            color: rgb(10, 2, 2);
+            background: radial-gradient(
+                circle at top,
+                #d173cf,
+                #ca84de 58%,
+                #f0b2fb
+            );
+            overflow-x: hidden;
+        }
+
+        .hearts {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .heart {
+            position: absolute;
+            bottom: -40px;
+            color: rgba(255, 105, 180, 0.55);
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            from {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+
+            15% {
+                opacity: 0.8;
+            }
+
+            to {
+                transform: translateY(-110vh) rotate(35deg);
+                opacity: 0;
+            }
+        }
+
+        .card {
+            width: min(100%, 480px);
+            padding: 30px 24px;
+            border: 1px solid rgba(240, 68, 145, 0.83);
+            border-radius: 28px;
+            text-align: center;
+            background: rgba(238, 175, 232, 0.772);
+            box-shadow: 0 18px 55px rgba(0,0,0,0.35);
+            backdrop-filter: blur(12px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 7px 13px;
+            border-radius: 30px;
+            color: #141213;
+            background: rgba(224, 162, 193, 0.939);
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        h1 {
+            margin: 16px 0 8px;
+            font-size: clamp(27px, 7vw, 36px);
+        }
+
+        .subtitle {
+            color: #161317;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .progress-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            color: #0c0b0c;
+            font-size: 13px;
+            margin-bottom: 9px;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 7px;
+            background: rgba(236, 174, 214, 0.963);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff6eb4, #d8a4ff);
+            border-radius: inherit;
+            transition: width 0.3s ease;
+        }
+
+        #question {
+            font-size: 22px;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .answers {
+            display: grid;
+            gap: 11px;
+        }
+
+        .answer {
+            width: 100%;
+            padding: 14px 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(237, 167, 254, 0.944);
+            background: rgba(241, 187, 231, 0.934);
+            color: rgb(22, 20, 20);
+            font-size: 15px;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .answer:hover {
+            background: rgba(248, 101, 241, 0.601);
+        }
+
+        .answer.selected {
+            border-color: #ff8fc8;
+            background: rgba(255,105,180,0.28);
+        }
+
+        .main-btn {
+            width: 100%;
+            margin-top: 22px;
+            padding: 14px 18px;
+            border: 0;
+            border-radius: 15px;
+            color: #28112d;
+            background: linear-gradient(90deg, #ff91c8, #e4b4ff);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .main-btn:disabled {
+            opacity: 0.45;
+            cursor: pointer;
+        }
+
+        .small-note {
+            margin-top: 17px;
+            font-size: 12px;
+            color: #000000;
+        }
+
+        .result-emoji {
+            font-size: 55px;
+            margin: 12px 0;
+        }
+
+        .score {
+            font-size: 42px;
+            font-weight: bold;
+            color: #161013;
+            margin: 12px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="hearts" id="hearts"></div>
+
+    <main class="card">
+
+        <section id="quizScreen">
+
+            <div class="badge">✨ FRIENDSHIP TEST ✨</div>
+
+            <h1>Best Friend Quiz 💗</h1>
+
+            <p class="subtitle">
+                How well do you really know me?
+            </p>
+
+            <div class="progress-row">
+                <span id="questionCount">Question 11 of 11</span>
+                <span id="progressPercent">0% completed</span>
+            </div>
+
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <h2 id="question"></h2>
+
+            <div class="answers" id="answers"></div>
+
+            <button class="main-btn" id="nextBtn" disabled>
+                Next Question ➜
+            </button>
+
+            <p class="small-note">
+                do you know me? ...let start the test! 💌
+            </p>
+
+        </section>
+
+        <section id="resultScreen" class="hidden">
+
+            <div class="badge">💖 QUIZ COMPLETED 💖</div>
+
+            <div class="result-emoji" id="resultEmoji">🎉</div>
+
+            <h1 id="resultTitle">Amazing!</h1>
+
+            <p class="subtitle">You got</p>
+
+            <div class="score" id="score">0 / 10</div>
+
+            <p class="subtitle" id="resultMessage"></p>
+
+            <button class="main-btn" id="restartBtn">
+                Play Again ↻
+            </button>
+
+            <p class="small-note">
+                Made with love for my favorite people 💗
+            </p>
+
+        </section>
+
+    </main>
+
+    <script>
+        // EDIT THESE QUESTIONS AND ANSWERS!
+
+        const questions = [
+
+            {
+                question: "What's my favorit material?",
+                options: [
+                    "1/ math", 
+                    "2/ informatic", 
+                    "3/ french", 
+                    "4/ engliche"],
+                correct: 1
+            },
+
+            {
+                question: "What's my favorite food?",
+                options: [
+                    "1/ Pizza 🍕", 
+                    "2/ Tacos 🌮", 
+                    "3/ Pasta 🍝", 
+                    "4/ Burgers 🍔"],
+                correct: 3
+            },
+
+            {
+                question: "What's my favorite season?",
+                options: [
+                    "1/ Summer ☀️", 
+                    "2/ Winter ❄️", 
+                    "3/ Spring 🌸", 
+                    "4/ Autumn 🍂"],
+                correct: 3
+            },
+
+            {
+                question: "What's my dream ",
+                options: [
+                    "1/ be a doctor",  
+                    "2/ be programatic ",  
+                    "3/ be teacher"],
+                correct: 1
+            },
+
+            {
+                question: "What do I enjoy doing most?",
+                options: [
+                    "1/ Reading 📚",
+                    "2/ Gaming 🎮", 
+                    "3/ Cooking 🍰", 
+                    "4/ Sleeping 😴"],
+                correct: 0
+            },
+
+            {
+                question: "What's my favorite kind of movie?",
+                options: ["1/Comedy 😆", 
+                   "1/ Horror 👻", 
+                   "2/ Action 💥", 
+                   "3/ Fantasy ✨"],
+                correct: 2
+            },
+
+            {
+              question: "What is the thing i hate?",
+                options: [
+                   "1/ french" , 
+                   "2/ using phone 24 hour",
+                   "3/ study", 
+                   "4/ someone forces me to do something"],
+                correct: 3
+            },
+            {
+                question: "What is my favorit country ?",
+                options: [
+                    "1/ usa",
+                    "2/ south korea",
+                    "3/ italie"
+                ],
+                correct: 0
+            },
+
+            {
+                question: "What makes me happiest?",
+                options: [
+                    "1/ Time with friends 🫶",
+                    "2/ Getting gifts 🎁",
+                    "3/ Listening to music 🎧",
+                    "4/ All of these 🌷"
+                ],
+                correct: 3
+            },
+
+            {
+                question: "What describes me best?",
+                options: [
+                    "1/ Funny 😂",
+                    "2/ Quiet 🌙",
+                    "3/  angry😡",
+                    "3/ everything 💫"
+                ],
+                correct: 0
+            },
+
+            {
+                question: "How important is my grades to me?",
+                options: [
+                    "1/ A little important ",
+                    "2/ Very important ",
+                    "3/ Not sure ",
+                    "4/ It's priceless "
+                ],
+                correct: 3
+            }
+
+        ];
+
+        let currentQuestion = 0;
+        let selectedAnswer = null;
+        let score = 0;
+
+        const questionEl = document.getElementById("question");
+        const answersEl = document.getElementById("answers");
+        const nextBtn = document.getElementById("nextBtn");
+
+        function showQuestion() {
+
+            selectedAnswer = null;
+
+            const item = questions[currentQuestion];
+
+            document.getElementById("questionCount").textContent =
+                `Question ${currentQuestion + 11} of ${questions.length}`;
+
+            document.getElementById("progressPercent").textContent =
+                `${Math.round((currentQuestion / questions.length) * 100)}% completed`;
+
+            document.getElementById("progressFill").style.width =
+                `${(currentQuestion / questions.length) * 100}%`;
+
+            questionEl.textContent = item.question;
+
+            answersEl.innerHTML = "";
+
+            nextBtn.disabled = false;
+
+            nextBtn.textContent =
+                currentQuestion === questions.length - 1
+                    ? "See My Result 💖"
+                    : "Next Question ➜";
+
+            item.options.forEach((option, index) => {
+
+                const button = document.createElement("button");
+
+                button.className = "answer";
+                button.type = "button";
+                button.textContent = option;
+
+                button.addEventListener("click", () => {
+
+                    selectedAnswer = index;
+
+                    document.querySelectorAll(".answer").forEach(btn => {
+                        btn.classList.remove("selected");
+                    });
+
+                    button.classList.add("selected");
+
+                    nextBtn.disabled = false;
+
+                });
+
+                answersEl.appendChild(button);
+
+            });
+
+        }
+
+        nextBtn.addEventListener("click", () => { 
+
+            if (selectedAnswer === questions[currentQuestion].correct) {
+         score++;
+         }
+         if (selectedAnswer === null) return;
+         currentQuestion++;
+
+
+            if (currentQuestion < questions.length) {
+                showQuestion(11);
+            } else {
+                showResult(11); }
+            });
+
+        function showResult() {
+
+            document.getElementById("quizScreen").classList.add("hidden");
+
+            document.getElementById("resultScreen").classList.remove("hidden");
+
+            document.getElementById("score").textContent =
+                `${score} / ${questions.length}`;
+
+            document.getElementById("progressFill").style.width = "100%";
+
+            const percentage = score / questions.length;
+
+            let title;
+            let message;
+            let emoji;
+
+            if (percentage >= 0.8) {
+
+                title = "You Know Me So Well! 🥹";
+                message = "You're truly one of my favorite people. Thanks for knowing me so well! 💗";
+                emoji = "🏆";
+
+            } else if (percentage >= 0.5) {
+
+                title = "A Pretty Good Friend! 💕";
+                message = "You know me pretty well, but there's still more to discover about me! 🌸";
+                emoji = "💝";
+            }
+
+
+            document.getElementById("resultTitle").textContent = title;
+            document.getElementById("resultMessage").textContent = message;
+            document.getElementById("resultEmoji").textContent = emoji;
+
+        }
+
+        document.getElementById("restartBtn").addEventListener("click", () => {
+
+            currentQuestion = 0;
+            selectedAnswer = null;
+            score = 0;
+
+            document.getElementById("resultScreen").classList.add("hidden");
+            document.getElementById("quizScreen").classList.remove("hidden");
+
+            showQuestion();
+
+        });
+
+        // Floating hearts animation
+
+        const heartsContainer = document.getElementById("hearts");
+
+        const heartSymbols = ["✦", "✦", "✦", "✦"];
+
+        for (let i = 0; i < 24; i++) {
+
+            const heart = document.createElement("span");
+
+            heart.className = "heart";
+
+            heart.textContent =
+                heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+
+            heart.style.left = `${Math.random() * 100}%`;
+
+            heart.style.animationDuration = `${8 + Math.random() * 12}s`;
+
+            heart.style.animationDelay = `${Math.random() * 12}s`;
+
+            heart.style.fontSize = `${12 + Math.random() * 18}px`;
+
+            heartsContainer.appendChild(heart);
+
+        }
+
+        showQuestion();
+
+    </script>
+
+</body>
+</html>
